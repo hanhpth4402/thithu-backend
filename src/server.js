@@ -81,7 +81,6 @@ app.get(`/example/:abc`, [cb0, cb1], (req, res, next) => {
   console.log(d);
   next()
 }, (req, res) => {
-  console.log('fhjkasdhfka');
 });
 
 app.get('/mon_thi', (req, res) => {
@@ -211,6 +210,14 @@ app.get ('/cau_hoi', (req, res) => {
 
 /////Lay de thi;
 
+app.get('/thong_tin_de', (req, res) => {
+  const thong_tin_de = req.query.thong_tin_de;
+  let query = `SELECT * FROM de_thi WHERE ID_DE_THI = '${thong_tin_de}'`;
+  connection.execute(query, (err, respond) => {
+    res.status(200).send(respond)
+  })
+})
+
 app.get('/de_thi', (req, res) => {
   const de_thi = req.query.de_thi;
 
@@ -245,12 +252,23 @@ app.post ('/submit', (req, res) => {
   var {id_user, id_de_thi, diem, ngay_thi, thoi_gian, chi_tiet} = req.body;
   let query1 = `SELECT * FROM users_de_thi as UD WHERE UD.ID_USERS = '${id_user}' AND UD.ID_DE_THI = '${id_de_thi}'`
   
+  let query2 = `SELECT DIEM_CAO_NHAT, SO_NGUOI_THAM_GIA FROM de_thi as DT where DT.ID_DE_THI = '${id_de_thi}'`;
+  let SO_NGUOI_THAM_GIA = 0;
+
+  connection.execute(query2, (err, respond) => {
+    if (respond[0].DIEM_CAO_NHAT < diem) {
+      let queryUpdatDiemCaoNhat = `UPDATE de_thi SET DIEM_CAO_NHAT = '${diem}' WHERE ID_DE_THI = '${id_de_thi}'`;
+      connection.execute(queryUpdatDiemCaoNhat);
+    };
+    SO_NGUOI_THAM_GIA = respond[0].SO_NGUOI_THAM_GIA;
+  })
+
   connection.execute(query1, (err, respond) => {
     if (err) {
       res.send(err);
     } else {
       if (respond[0]) {
-        let totalErr;
+        let totalErr;  
 
         let query1 = `UPDATE users_de_thi SET DIEM='${diem}',NGAY_THI='${ngay_thi}',THOI_GIAN='${thoi_gian}' WHERE ID_USERS='${id_user}' AND ID_DE_THI='${id_de_thi}'`
         connection.execute(query1, (err, respond) => {
@@ -277,6 +295,9 @@ app.post ('/submit', (req, res) => {
 
       } else {
         let totalErr;
+
+        let querySoNguoiThamGia = `UPDATE de_thi SET SO_NGUOI_THAM_GIA = '${SO_NGUOI_THAM_GIA+1}' WHERE ID_DE_THI = '${id_de_thi}'`;
+        connection.execute(querySoNguoiThamGia);
 
         let query2 = `INSERT INTO users_de_thi VALUES ('${id_user}','${id_de_thi}','${diem}','${ngay_thi}','${thoi_gian}')`;
         connection.execute(query2, (err, respond) => {
@@ -337,7 +358,7 @@ app.post ('/chi_tiet', (req, res) => {
       if (respond[0]) {
         let tmp = respond[0];
         let ds_answer = [];
-        let query2 = `SELECT * FROM users_de_thi_chi_tiet as CT, cau_hoi as CH WHERE CT.ID_USERS='${id_user}' AND CT.ID_CAU_HOI = CH.ID_CAU_HOI AND CT.ID_DE_THI = '${id_de_thi}'`;
+        let query2 = `SELECT * FROM users_de_thi_chi_tiet as CT, cau_hoi as CH LEFT JOIN hoc_phan as HP ON CH.ID_HOC_PHAN = HP.ID_HOC_PHAN WHERE CT.ID_USERS='USER_1' AND CT.ID_CAU_HOI = CH.ID_CAU_HOI AND CT.ID_DE_THI = '${id_de_thi}'`;
 
         connection.execute(query2, (err, respond) => {
           ds_answer = respond;
@@ -348,8 +369,8 @@ app.post ('/chi_tiet', (req, res) => {
             "DIEM": tmp.DIEM,
             "NGAY_THI": tmp.NGAY_THI,
             "THOI_GIAN": tmp.THOI_GIAN,
+            "THOI_GIAN_LAM": tmp.THOI_GIAN_LAM,
             "TEN_DE": tmp.TEN_DE,
-            "ID_HOC_PHAN": tmp.ID_HOC_PHAN,
             "TYPE": tmp.TYPE,
             "CHI_TIET_CAU_TRA_LOI": ds_answer
           };
@@ -360,10 +381,9 @@ app.post ('/chi_tiet', (req, res) => {
 
 
       } else {
-        console.log(req.body);
         res.status(404).send({
           body: req.body,
-          user: "fsdfa" + id_user,
+          user: + id_user,
           de_thi: id_de_thi,
           type: true,
           message: "Khong tong tai"
@@ -373,18 +393,6 @@ app.post ('/chi_tiet', (req, res) => {
   })
 }) 
 
-app.post ('/getanh', (req, res) => {
-  var {id_cau} = req.body
-  let query1 = `SELECT NOI_DUNG_ANH FROM cau_hoi WHERE ID_CAU_HOI = 'CH_13'`;
-
-  connection.execute(query1, (err, respond) => {
-    if (err) {
-      res.status(404).send(err);
-    } else {
-      res.status(200).send(respond);
-    }
-  })   
-})     
 
 
 
