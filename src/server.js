@@ -359,7 +359,7 @@ app.post ('/chi_tiet', (req, res) => {
         let tmp = respond[0];
         let ds_answer = [];
         let query2 = `SELECT * FROM users_de_thi_chi_tiet as CT, cau_hoi as CH LEFT JOIN hoc_phan as HP ON CH.ID_HOC_PHAN = HP.ID_HOC_PHAN WHERE CT.ID_USERS='USER_1' AND CT.ID_CAU_HOI = CH.ID_CAU_HOI AND CT.ID_DE_THI = '${id_de_thi}'`;
-
+//mo cai nao do
         connection.execute(query2, (err, respond) => {
           ds_answer = respond;
 
