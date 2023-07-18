@@ -7,7 +7,13 @@ const initAPIRoute = (app) => {
     router.get('/users', APIcontroller.getAllUsers); ///method GET -> READ data
     router.post('/create-user', APIcontroller.createNewUser);
     
-    return app.use('/api/v1', router)
+    router.get('/abcabcabc', (req, res) => {
+        res.status(200).send({
+            message: "hello"
+        })
+    })
+
+    return app.use('', router)
 }    
 
 export default initAPIRoute

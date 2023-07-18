@@ -9,4 +9,4 @@ const connect = mysql.createPool({
     database: 'nodejsbasic',
 })
 
-export default connect;
+export default connect;    
