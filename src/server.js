@@ -7,19 +7,20 @@ import cors from 'cors';
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  database: 'mock_test',
+  database: 'thithu_data',
+  password: 'm@tKhaumysql'
 });
 
 connection.connect((error) => {
   if (error) {
-    console.log (error);
+    console.log(error);
   }
   else {
-    console.log ('ket noi thanh cong');
+    console.log('ket noi thanh cong');
   }
 })
 
-console.log ('hanh');
+console.log('hanh');
 
 const app = express()
 const port = 8082;
@@ -37,10 +38,10 @@ app.get('/usersss', (req, res) => {
   const query = "SELECT * FROM users";
   connection.query(query, (err, result) => {
     if (err) {
-      console.log (err);
+      console.log(err);
     }
     res.status(200).json({
-      message: 'success',  
+      message: 'success',
       data: result
     });
     console.log(req.params);
@@ -53,7 +54,7 @@ app.post('/users/getuser', (req, res) => {
   const postId = req.query.postId;
   console.log(req.body);
 
-  
+
   console.log(req.query);
   res.send(`User ID: ${userId}, Post ID: ${postId}`);
 });
@@ -120,7 +121,7 @@ app.get('/de_thi_mon', (req, res) => {
 })
 
 
-app.get ('/ten_mon', (req, res) => {
+app.get('/ten_mon', (req, res) => {
   const ten_mon = req.query.ten_mon;
   const type = req.query.type;
   let query = `SELECT COUNT(*) AS sodethi FROM de_thi WHERE ID_MON_HOC='${ten_mon}' AND TYPE='${type}'`
@@ -145,7 +146,7 @@ app.get('/ten_de', (req, res) => {
     }
     res.status(200).send(respond);
   })
-} );
+});
 
 app.get('/de_thi_mon', (req, res) => {
   const de_thi_mon = req.query.de_thi_mon;
@@ -193,7 +194,7 @@ app.get('/de_thi_theo_hoc_phan', (req, res) => {
 
 /////Get cau hoi
 
-app.get ('/cau_hoi', (req, res) => {
+app.get('/cau_hoi', (req, res) => {
   const cau_hoi = req.query.cau_hoi;
 
   let query = `SELECT * FROM cau_hoi WHERE ID_CAU_HOI='${cau_hoi}'`;
@@ -221,7 +222,7 @@ app.get('/thong_tin_de', (req, res) => {
 app.get('/de_thi', (req, res) => {
   const de_thi = req.query.de_thi;
 
-  let query = "SELECT `cau_hoi`.`ID_CAU_HOI`, `cau_hoi`.`ID_HOC_PHAN`, `cau_hoi`.`ID_MON_HOC`, `cau_hoi`.`ID_MUC_DO`, `cau_hoi`.`NOI_DUNG`, `cau_hoi`.`NOI_DUNG_ANH`, `DAP_AN_A`, `DAP_AN_A_ANH`, `DAP_AN_B`, `DAP_AN_B_ANH`, `DAP_AN_C`, `DAP_AN_C_ANH`, `DAP_AN_D`, `DAP_AN_D_ANH`, `DAP_AN`, `NOI_DUNG_DAP_AN` FROM `cau_hoi`, `de_thi_cau_hoi` WHERE `cau_hoi`.`ID_CAU_HOI` = `de_thi_cau_hoi`.`ID_CAU_HOI` and `de_thi_cau_hoi`.`ID_DE_THI` ='" + de_thi +"'";
+  let query = "SELECT `cau_hoi`.`ID_CAU_HOI`, `cau_hoi`.`ID_HOC_PHAN`, `cau_hoi`.`ID_MON_HOC`, `cau_hoi`.`ID_MUC_DO`, `cau_hoi`.`NOI_DUNG`, `cau_hoi`.`NOI_DUNG_ANH`, `DAP_AN_A`, `DAP_AN_A_ANH`, `DAP_AN_B`, `DAP_AN_B_ANH`, `DAP_AN_C`, `DAP_AN_C_ANH`, `DAP_AN_D`, `DAP_AN_D_ANH`, `DAP_AN`, `NOI_DUNG_DAP_AN` FROM `cau_hoi`, `de_thi_cau_hoi` WHERE `cau_hoi`.`ID_CAU_HOI` = `de_thi_cau_hoi`.`ID_CAU_HOI` and `de_thi_cau_hoi`.`ID_DE_THI` ='" + de_thi + "'";
 
   connection.execute(query, (err, respond) => {
     if (err) {
@@ -233,8 +234,8 @@ app.get('/de_thi', (req, res) => {
 });
 
 
-app.post ('/login', (req, res) => {
-  var {email, password} = req.body;
+app.post('/login', (req, res) => {
+  var { email, password } = req.body;
 
   let query = `SELECT * FROM users WHERE EMAIL = '${email}' AND PASSWORD = '${password}'`;
 
@@ -245,13 +246,13 @@ app.post ('/login', (req, res) => {
       res.status(200).send(respond);
     }
   })
-  
+
 });
 
-app.post ('/submit', (req, res) => {
-  var {id_user, id_de_thi, diem, ngay_thi, thoi_gian, chi_tiet} = req.body;
+app.post('/submit', (req, res) => {
+  var { id_user, id_de_thi, diem, ngay_thi, thoi_gian, chi_tiet } = req.body;
   let query1 = `SELECT * FROM users_de_thi as UD WHERE UD.ID_USERS = '${id_user}' AND UD.ID_DE_THI = '${id_de_thi}'`
-  
+
   let query2 = `SELECT DIEM_CAO_NHAT, SO_NGUOI_THAM_GIA FROM de_thi as DT where DT.ID_DE_THI = '${id_de_thi}'`;
   let SO_NGUOI_THAM_GIA = 0;
 
@@ -268,7 +269,7 @@ app.post ('/submit', (req, res) => {
       res.send(err);
     } else {
       if (respond[0]) {
-        let totalErr;  
+        let totalErr;
 
         let query1 = `UPDATE users_de_thi SET DIEM='${diem}',NGAY_THI='${ngay_thi}',THOI_GIAN='${thoi_gian}' WHERE ID_USERS='${id_user}' AND ID_DE_THI='${id_de_thi}'`
         connection.execute(query1, (err, respond) => {
@@ -296,7 +297,7 @@ app.post ('/submit', (req, res) => {
       } else {
         let totalErr;
 
-        let querySoNguoiThamGia = `UPDATE de_thi SET SO_NGUOI_THAM_GIA = '${SO_NGUOI_THAM_GIA+1}' WHERE ID_DE_THI = '${id_de_thi}'`;
+        let querySoNguoiThamGia = `UPDATE de_thi SET SO_NGUOI_THAM_GIA = '${SO_NGUOI_THAM_GIA + 1}' WHERE ID_DE_THI = '${id_de_thi}'`;
         connection.execute(querySoNguoiThamGia);
 
         let query2 = `INSERT INTO users_de_thi VALUES ('${id_user}','${id_de_thi}','${diem}','${ngay_thi}','${thoi_gian}')`;
@@ -316,7 +317,7 @@ app.post ('/submit', (req, res) => {
         connection.execute(query3, (err, respond) => {
           if (err) {
             totalErr += err;
-          } 
+          }
         });
 
         if (totalErr) {
@@ -331,7 +332,7 @@ app.post ('/submit', (req, res) => {
 
 });
 
-app.get ('/bai_lam', (req, res) => {
+app.get('/bai_lam', (req, res) => {
   var id_user = req.query.bai_lam;
 
   let query = `SELECT * FROM users_de_thi AS US, de_thi AS DT, mon_hoc AS MH WHERE US.ID_USERS = '${id_user}' AND US.ID_DE_THI = DT.ID_DE_THI AND DT.ID_MON_HOC = MH.ID_MON_HOC`;
@@ -346,8 +347,8 @@ app.get ('/bai_lam', (req, res) => {
 });
 
 //////Lay chi tiet bai lam cua thi sinh;
-app.post ('/chi_tiet', (req, res) => {
-  var {id_user, id_de_thi} = req.body;
+app.post('/chi_tiet', (req, res) => {
+  var { id_user, id_de_thi } = req.body;
 
   let query1 = `SELECT * FROM users_de_thi AS US, de_thi AS DT WHERE US.ID_USERS = '${id_user}' AND US.ID_DE_THI = '${id_de_thi}' AND DT.ID_DE_THI = '${id_de_thi}'`;
 
@@ -359,7 +360,7 @@ app.post ('/chi_tiet', (req, res) => {
         let tmp = respond[0];
         let ds_answer = [];
         let query2 = `SELECT * FROM users_de_thi_chi_tiet as CT, cau_hoi as CH LEFT JOIN hoc_phan as HP ON CH.ID_HOC_PHAN = HP.ID_HOC_PHAN WHERE CT.ID_USERS='USER_1' AND CT.ID_CAU_HOI = CH.ID_CAU_HOI AND CT.ID_DE_THI = '${id_de_thi}'`;
-//mo cai nao do
+        //mo cai nao do
         connection.execute(query2, (err, respond) => {
           ds_answer = respond;
 
@@ -374,7 +375,7 @@ app.post ('/chi_tiet', (req, res) => {
             "TYPE": tmp.TYPE,
             "CHI_TIET_CAU_TRA_LOI": ds_answer
           };
-  
+
           res.status(200).send(result);
           // console.log(respond);
         });
@@ -391,14 +392,159 @@ app.post ('/chi_tiet', (req, res) => {
       }
     }
   })
-}) 
+})
+
+app.post('/admin/login', (req, res) => {
+  var { email, password } = req.body;
+
+  let query = `SELECT * FROM admin WHERE EMAIL = '${email}' AND PASSWORD = '${password}'`;
+
+  connection.execute(query, (err, respond) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.status(200).send(respond);
+    }
+  })
+})
+
+app.post('/admin/de_thi', (req, res) => {
+  const ID_ADMIN = req.body.ID_ADMIN
+  let query = "SELECT admin_de_thi.NGAY_TAO, de_thi.* FROM admin_de_thi, de_thi WHERE  de_thi.ID_DE_THI = admin_de_thi.ID_DE_THI and admin_de_thi.ID_ADMIN = ?"
+  connection.execute(query, [ID_ADMIN], (err, result) => {
+    if (err) {
+      res.send("lỗi truy vấn");
+    } else {
+      res.status(200).send(result);
+    }
+  })
+})
+
+app.get('/admin/ngan_hang_cau_hoi', (req, res) => {
+  let query = "SELECT * from cau_hoi"
+  connection.execute(query, (err, result) => {
+    if (err) {
+      res.send("lỗi truy vấn", err)
+    } else {
+      res.status(200).send(result)
+    }
+  })
+})
+
+app.get('/admin/list_cau_hoi', (req, res) => {
+  console.log(req.query)
+  const ID_DE_THI = req.query.ID_DE_THI;
+
+  let query = `
+  SELECT
+    ch.*,
+    CASE
+      WHEN ch.ID_CAU_HOI IN (
+        SELECT ID_CAU_HOI
+        FROM de_thi_cau_hoi
+        WHERE ID_DE_THI = '${ID_DE_THI}'
+      ) THEN true
+      ELSE false
+    END AS checked
+  FROM
+    cau_hoi ch;
+`;
+  connection.execute(query,
+    (err, result) => {
+      if (err) {
+        res.send(err)
+      } else {
+        res.status(200).send(result)
+      }
+    })
+
+})
+
+app.post('/admin/tao_de_thi', (req, res) => {
+  const { ID_ADMIN, NGAY_TAO, TEN_DE, ID_DE_THI, ID_MON_HOC, THOI_GIAN, TYPE, SO_CAU, listCauhoi } = req.body
+  var error = false;
+
+  let query = "INSERT INTO de_thi (TEN_DE, ID_DE_THI, ID_MON_HOC, THOI_GIAN, TYPE, SO_CAU) values (?, ?, ?, ?, ?, ?)"
+  connection.execute(query, [TEN_DE, ID_DE_THI, ID_MON_HOC, THOI_GIAN, TYPE, SO_CAU],
+    (err, result) => {
+      if (err) {
+        res.send(err)
+        error = true
+      }
+    }
+  )
+
+  let query2 = "INSERT INTO admin_de_thi(ID_ADMIN, ID_DE_THI, NGAY_TAO) values (?, ?, ?)"
+  connection.execute(query2, [ID_ADMIN, ID_DE_THI, NGAY_TAO],
+    (err, result) => {
+      if (err) {
+        res.send(err)
+        error = true
+      }
+    }
+  )
 
 
+  let query3 = "INSERT INTO de_thi_cau_hoi(ID_DE_THI, ID_CAU_HOI) values ( ?, ?)"
+  listCauhoi.map((item, index) => {
+    connection.execute(query3, [ID_DE_THI, item],
+      (err, result) => {
+        if (err) {
+          res.send(err)
+          error = false
+        }
+      }
+    )
+  })
+
+  if (!error) {
+    res.send("create success!")
+  } else {
+    res.send(error)
+  }
+
+})
+
+app.delete('/admin/xoa_de_thi', (req, res) => {
+  const {ID_ADMIN, ID_DE_THI} = req.query
+  console.log(req.query)
+  var error = false;
+
+  let query1 = `DELETE FROM admin_de_thi WHERE ID_DE_THI = '${ID_DE_THI}' and ID_ADMIN = '${ID_ADMIN}'`
+  connection.query(query1, (err, result) => {
+    if(err) {
+      res.send(err)
+      error = true
+    } 
+  })
+
+  let query2 = `DELETE FROM de_thi WHERE ID_DE_THI = '${ID_DE_THI}'`
+  connection.query(query2, (err, result) => {
+    if(err) {
+      res.send(err)
+      error = true
+    } 
+  })
+
+  let query3 = `DELETE FROM de_thi_cau_hoi WHERE ID_DE_THI = '${ID_DE_THI}' `
+  connection.query(query3, (err, result) => {
+    if(err) {
+      res.send(err)
+      error = true
+    } 
+  })
+
+  if (!error) {
+    res.send("delete success!")
+  } else {
+    res.send(error)
+  }
 
 
+})
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)    
+  console.log(`Example app listening on port ${port}`)
 })
 
 // const query = "SELECT * FROM users";
@@ -409,3 +555,4 @@ app.listen(port, () => {
 //   let [rows, field] = result;
 //   console.log(result);
 // })
+
