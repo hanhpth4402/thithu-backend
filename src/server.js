@@ -1,6 +1,7 @@
 import express, { query, response } from 'express';
 import mysql from 'mysql2';
 import cors from 'cors';
+import initAPIRoute from './route/Api';
 
 
 
@@ -28,7 +29,9 @@ const port = 8082;
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 
-app.use(cors())
+app.use(cors());
+
+initAPIRoute(app);
 
 app.get('/', (req, res) => {
   res.send('Helloollll!')

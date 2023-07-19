@@ -9,4 +9,4 @@ const connect = mysql.createPool({
     database: 'thithu_data',
 })
 
-export default connect;
+export default connect;    
