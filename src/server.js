@@ -2,7 +2,7 @@ import express, { query, response } from 'express';
 import mysql from 'mysql2';
 import cors from 'cors';
 import initAPIRoute from './route/Api';
-
+const multer = require('multer');
 
 
 const connection = mysql.createConnection({
@@ -11,6 +11,9 @@ const connection = mysql.createConnection({
   database: 'thithu_data',
   password: 'm@tKhaumysql'
 });
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 connection.connect((error) => {
   if (error) {
@@ -411,6 +414,21 @@ app.post('/admin/login', (req, res) => {
   })
 })
 
+app.post('/admin/register', (req, res) => {
+  console.log(req.body)
+  const {name, email, password} = req.body
+  const randomNumberInRange = Math.floor(Math.random() * 100) + 1;
+  let query = "INSERT INTO admin(ID_ADMIN, EMAIL, ADMIN, PASSWORD) VALUES (?, ?, ?, ?)"
+  connection.execute(query, [`ADMIN_${randomNumberInRange}`, email, name, password ],
+  (err, result) => {
+    if(err) {
+      res.send(err)
+    } else {
+      res.status(200).send("register success!")
+    }
+  })
+})
+
 app.post('/admin/de_thi', (req, res) => {
   const ID_ADMIN = req.body.ID_ADMIN
   let query = "SELECT admin_de_thi.NGAY_TAO, de_thi.* FROM admin_de_thi, de_thi WHERE  de_thi.ID_DE_THI = admin_de_thi.ID_DE_THI and admin_de_thi.ID_ADMIN = ?"
@@ -435,7 +453,6 @@ app.get('/admin/ngan_hang_cau_hoi', (req, res) => {
 })
 
 app.get('/admin/list_cau_hoi', (req, res) => {
-  console.log(req.query)
   const ID_DE_THI = req.query.ID_DE_THI;
 
   let query = `
@@ -460,6 +477,48 @@ app.get('/admin/list_cau_hoi', (req, res) => {
         res.status(200).send(result)
       }
     })
+
+})
+
+app.post('/admin/them_cau_hoi', upload.fields([
+    { name: 'NOI_DUNG_ANH', maxCount: 1 },
+    { name: 'DAP_AN_A_ANH', maxCount: 1 },
+    { name: 'DAP_AN_B_ANH', maxCount: 1 },
+    { name: 'DAP_AN_C_ANH', maxCount: 1 },
+    { name: 'DAP_AN_D_ANH', maxCount: 1 }
+  ]), (req, res) => {
+  let { ID_CAU_HOI, ID_HOC_PHAN, ID_MON_HOC, ID_MUC_DO, NOI_DUNG, DAP_AN_A, DAP_AN_B, DAP_AN_C, DAP_AN_D, DAP_AN, NOI_DUNG_DAP_AN } = req.body
+  ID_HOC_PHAN = ID_HOC_PHAN === 'null' ? null : ID_HOC_PHAN;
+  let NOI_DUNG_ANH = req.files['NOI_DUNG_ANH'] ? req.files['NOI_DUNG_ANH'][0].buffer : null;
+  let DAP_AN_A_ANH = req.files['DAP_AN_A_ANH'] ? req.files['DAP_AN_A_ANH'][0].buffer : null;
+  let DAP_AN_B_ANH = req.files['DAP_AN_B_ANH'] ? req.files['DAP_AN_B_ANH'][0].buffer : null;
+  let DAP_AN_C_ANH = req.files['DAP_AN_C_ANH'] ? req.files['DAP_AN_C_ANH'][0].buffer : null;
+  let DAP_AN_D_ANH = req.files['DAP_AN_D_ANH'] ? req.files['DAP_AN_D_ANH'][0].buffer : null;
+
+  const maxSizeInBytes = 10 * 1024 * 1024; //10MB
+
+  if (NOI_DUNG_ANH && NOI_DUNG_ANH.length > maxSizeInBytes) {
+    res.send("Kích thước ảnh Nội dung quá lớn. Không thể lưu trữ vào cơ sở dữ liệu.");
+  } else if (DAP_AN_A_ANH && DAP_AN_A_ANH.length > maxSizeInBytes) {
+    res.send("Kích thước ảnh Đáp án A quá lớn. Không thể lưu trữ vào cơ sở dữ liệu.");
+  } else if (DAP_AN_B_ANH && DAP_AN_B_ANH.length > maxSizeInBytes) {
+    res.send("Kích thước ảnh Đáp án B quá lớn. Không thể lưu trữ vào cơ sở dữ liệu.");
+  } else if (DAP_AN_C_ANH && DAP_AN_C_ANH.length > maxSizeInBytes) {
+    res.send("Kích thước ảnh Đáp án C quá lớn. Không thể lưu trữ vào cơ sở dữ liệu.");
+  } else if (DAP_AN_D_ANH && DAP_AN_D_ANH.length > maxSizeInBytes) {
+    res.send("Kích thước ảnh Đáp án D quá lớn. Không thể lưu trữ vào cơ sở dữ liệu.");
+  } else {
+    let query = `INSERT INTO cau_hoi (ID_CAU_HOI, ID_HOC_PHAN, ID_MON_HOC, ID_MUC_DO, NOI_DUNG, NOI_DUNG_ANH, DAP_AN_A, DAP_AN_A_ANH,  DAP_AN_B, DAP_AN_B_ANH,  DAP_AN_C, DAP_AN_C_ANH,  DAP_AN_D, DAP_AN_D_ANH, DAP_AN, NOI_DUNG_DAP_AN) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    connection.query(query,
+      [ID_CAU_HOI, ID_HOC_PHAN, ID_MON_HOC, ID_MUC_DO, NOI_DUNG, NOI_DUNG_ANH, DAP_AN_A, DAP_AN_A_ANH, DAP_AN_B, DAP_AN_B_ANH, DAP_AN_C, DAP_AN_C_ANH, DAP_AN_D, DAP_AN_D_ANH, DAP_AN, NOI_DUNG_DAP_AN],
+      (err, result) => {
+        if (err) {
+          res.send(err)
+        } else {
+          res.status(200).send("create success!")
+        }
+      })
+  }
 
 })
 
@@ -509,32 +568,32 @@ app.post('/admin/tao_de_thi', (req, res) => {
 })
 
 app.delete('/admin/xoa_de_thi', (req, res) => {
-  const {ID_ADMIN, ID_DE_THI} = req.query
+  const { ID_ADMIN, ID_DE_THI } = req.query
   console.log(req.query)
   var error = false;
 
   let query1 = `DELETE FROM admin_de_thi WHERE ID_DE_THI = '${ID_DE_THI}' and ID_ADMIN = '${ID_ADMIN}'`
   connection.query(query1, (err, result) => {
-    if(err) {
+    if (err) {
       res.send(err)
       error = true
-    } 
+    }
   })
 
   let query2 = `DELETE FROM de_thi WHERE ID_DE_THI = '${ID_DE_THI}'`
   connection.query(query2, (err, result) => {
-    if(err) {
+    if (err) {
       res.send(err)
       error = true
-    } 
+    }
   })
 
   let query3 = `DELETE FROM de_thi_cau_hoi WHERE ID_DE_THI = '${ID_DE_THI}' `
   connection.query(query3, (err, result) => {
-    if(err) {
+    if (err) {
       res.send(err)
       error = true
-    } 
+    }
   })
 
   if (!error) {
